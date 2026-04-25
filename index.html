@@ -189,10 +189,12 @@
         const modal = document.getElementById('fullscreen-modal');
         const img = document.getElementById('fullscreen-img');
         img.src = window.currentItem.file;
+        modal.style.display = 'flex';
         modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        // Use a faster transition for AR mode stability
-        modal.classList.remove('opacity-0');
+        // Small delay to ensure display:flex is registered before opacity transition
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+        }, 10);
       };
 
       window.closeFullscreen = function() {
@@ -200,7 +202,7 @@
         modal.classList.add('opacity-0');
         setTimeout(() => {
           modal.classList.add('hidden');
-          modal.classList.remove('flex');
+          modal.style.display = 'none';
         }, 500);
       };
 
@@ -247,7 +249,7 @@
     </a-scene>
 
     <!-- UI Overlay Container -->
-    <div id="ui-container" style="pointer-events: none;">
+    <div id="ui-container" class="w-full h-full" style="pointer-events: none;">
       <div class="fixed inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-10 z-50">
       
       <!-- Top Nav -->
@@ -296,7 +298,7 @@
       </div>
 
       <!-- Fullscreen Image Modal (Inside UI container for AR support) -->
-      <div id="fullscreen-modal" class="hidden fixed inset-0 z-[200] bg-black/95 opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto">
+      <div id="fullscreen-modal" class="hidden fixed inset-0 z-[200] bg-black opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto" style="display: none;">
         <button onclick="window.closeFullscreen()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[210]">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
