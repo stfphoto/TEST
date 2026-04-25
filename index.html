@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AR Gallery</title>
+    
+    <!-- Libraries -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+      body { margin: 0; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; }
+      .a-canvas { width: 100% !important; height: 100% !important; }
+      .a-enter-vr { display: none !important; }
+      
+      .glass { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+      .glass-light { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+      
+      .font-serif { font-family: 'Cormorant Garamond', serif; }
+      .font-display { font-family: 'Montserrat', sans-serif; }
+      
+      @keyframes pulse-soft {
+        0%, 100% { opacity: 0.2; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(1.1); }
+      }
+      .animate-pulse-soft { animation: pulse-soft 8s infinite ease-in-out; }
+    </style>
+
+    <script>
+      // 1. Configuration Data
+      const CURATOR_NOTE = "This is a digital experience that will showcase pictures showing how our Leaders became a good influence through wholeheartedly fulfilling their duty. And as a result, it led to the wholehearted fulfillment of duties by the ministers and ministerial workers and the Church officers";
+
+      const GALLERY_DATA = [
+        { 
+          id: 1, 
+          title: "Eye po", 
+          artist: "STF Photography", 
+          file: "assets/pic1.jpg", 
+          description: "Painting ng eye po.",
+          year: "2024"
+        },
+        { 
+          id: 2, 
+          title: "Man po", 
+          artist: "STF Photography", 
+          file: "assets/pic2.jpg", 
+          description: "Picture ng ------",
+          year: "2023"
+        },
+        { 
+          id: 3, 
+          title: "Mossaic po", 
+          artist: "STF Photography", 
+          file: "assets/pic3.jpg", 
+          description: "Mossaic lang po ----",
+          year: "2024"
+        },
+        { 
+          id: 4, 
+          title: "Girl po", 
+          artist: "STF Photography", 
+          file: "assets/pic4.jpg", 
+          description: "Picture ng girl.",
+          year: "2023"
+        },
+        { 
+          id: 5, 
+          title: "Guitar po", 
+          artist: "STF Photography", 
+          file: "assets/pic5.jpg", 
+          description: "Painting ng guitar po.",
+          year: "2024"
+        },
+        { 
+          id: 6, 
+          title: "Man playing instrument", 
+          artist: "STF Photography", 
+          file: "assets/pic6.jpg", 
+          description: "Nagpplay po ng instrument.",
+          year: "2024"
+        },
+        { 
+          id: 7, 
+          title: "Gallery Piece 7", 
+          artist: "STF Photography", 
+          file: "assets/pic1.jpg", 
+          description: "Additional gallery piece.",
+          year: "2024"
+        },
+        { 
+          id: 8, 
+          title: "Gallery Piece 8", 
+          artist: "STF Photography", 
+          file: "assets/pic2.jpg", 
+          description: "Additional gallery piece.",
+          year: "2024"
+        }
+      ];
+
+      // 2. A-Frame Component Registration (Must be before scene)
+      if (typeof AFRAME !== 'undefined') {
+        AFRAME.registerComponent('gallery-item', {
+          schema: { id: {type: 'number'} },
+          init: function () {
+            this.el.addEventListener('click', () => {
+              const item = GALLERY_DATA.find(d => d.id === this.data.id);
+              window.showInfoCard(item);
+            });
+            
+            this.el.addEventListener('mouseenter', () => {
+              // AUTO-POP: Show info card on hover/point
+              const item = GALLERY_DATA.find(d => d.id === this.data.id);
+              window.showInfoCard(item);
+
+              this.el.setAttribute('animation__scale', {
+                property: 'scale',
+                to: '1.05 1.05 1.05',
+                dur: 200
+              });
+            });
+            
+            this.el.addEventListener('mouseleave', () => {
+              this.el.setAttribute('animation__scale', {
+                property: 'scale',
+                to: '1 1 1',
+                dur: 200
+              });
+            });
+          }
+        });
+
+        AFRAME.registerComponent('follow-position', {
+          schema: { target: {type: 'selector'} },
+          tick: function () {
+            if (!this.data.target) return;
+            const targetPos = this.data.target.object3D.position;
+            this.el.object3D.position.copy(targetPos);
+          }
+        });
+
+        AFRAME.registerComponent('camera-limit', {
+          schema: { limit: {type: 'number', default: 95} },
+          tick: function () {
+            const rot = this.el.getAttribute('rotation');
+            if (rot.y > this.data.limit) {
+              rot.y = this.data.limit;
+              this.el.setAttribute('rotation', rot);
+            } else if (rot.y < -this.data.limit) {
+              rot.y = -this.data.limit;
+              this.el.setAttribute('rotation', rot);
+            }
+          }
+        });
+      }
+
+      // 3. UI Functions
+      window.currentItem = null;
+
+      window.showInfoCard = function(item) {
+        const card = document.getElementById('info-card');
+        if (!card) return;
+        if (!item) {
+          card.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+          window.currentItem = null;
+          return;
+        }
+        window.currentItem = item;
+        document.getElementById('card-title').innerText = item.title;
+        document.getElementById('card-artist').innerText = `by ${item.artist}`;
+        document.getElementById('card-description').innerText = item.description;
+        document.getElementById('card-year').innerText = item.year;
+        card.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+      };
+
+      window.viewFullscreen = function() {
+        if (!window.currentItem) return;
+        const modal = document.getElementById('fullscreen-modal');
+        const img = document.getElementById('fullscreen-img');
+        img.src = window.currentItem.file;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+      };
+
+      window.closeFullscreen = function() {
+        const modal = document.getElementById('fullscreen-modal');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }, 500);
+      };
+
+      window.enterAR = function() {
+        const scene = document.querySelector('a-scene');
+        if (scene && scene.enterAR) scene.enterAR();
+      };
+
+      window.closeInstructions = function() {
+        const modal = document.getElementById('instructions-modal');
+        if (modal) modal.classList.add('opacity-0', 'pointer-events-none');
+      };
+    </script>
+  </head>
+  <body>
+    <!-- A-Frame Scene -->
+    <a-scene 
+      webxr="overlayElement: #ui-container; optionalFeatures: dom-overlay;" 
+      renderer="colorManagement: true; antialias: true; alpha: true;"
+    >
+      <a-assets id="gallery-assets"></a-assets>
+
+      <a-camera id="main-camera" camera-limit="limit: 100" position="0 1.6 0" look-controls="pointerLockEnabled: false; touchEnabled: true;" wasd-controls="enabled: false">
+        <a-cursor 
+          color="#FFD700" 
+          animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+          raycaster="objects: .clickable"
+        ></a-cursor>
+      </a-camera>
+
+      <a-entity id="gallery-container" follow-position="#main-camera" position="0 1.6 0"></a-entity>
+
+      <a-light type="ambient" intensity="0.8"></a-light>
+      <a-light type="directional" position="1 5 2" intensity="0.6"></a-light>
+      
+      <a-plane id="floor" rotation="-90 0 0" width="50" height="50" color="#050505" material="roughness: 0.8; metalness: 0.2"></a-plane>
+      
+      <!-- Subtle Backdrop Wall to ground the gallery -->
+      <a-entity position="0 2 -6" rotation="0 0 0">
+        <a-plane width="15" height="8" color="#0a0a0a" material="opacity: 0.5; transparent: true; roughness: 1"></a-plane>
+      </a-entity>
+
+      <a-sky id="sky" color="#000"></a-sky>
+    </a-scene>
+
+    <!-- UI Overlay Container -->
+    <div id="ui-container" style="pointer-events: none;">
+      <div class="fixed inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-10 z-50">
+      
+      <!-- Top Nav -->
+      <div class="flex justify-between items-start pointer-events-auto">
+        <div class="glass px-6 py-4 rounded-2xl flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>
+          </div>
+          <div>
+            <h1 class="text-white text-lg font-display font-semibold tracking-tight leading-tight">AR GALLERY</h1>
+            <p class="text-white/40 text-[10px] uppercase tracking-[0.2em] font-medium">Exhibit 2026</p>
+          </div>
+        </div>
+        
+        <button onclick="location.reload()" class="p-4 glass rounded-full text-white hover:bg-white/10 transition-all active:scale-90">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        </button>
+      </div>
+
+      <!-- Bottom Controls -->
+      <div class="flex flex-row justify-between items-end w-full pointer-events-none">
+        
+        <!-- Info Card (Moved to bottom-left) -->
+        <div id="info-card" class="opacity-0 translate-y-10 pointer-events-none transition-all duration-500 glass p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl max-w-[320px] md:max-w-md w-full text-white relative overflow-hidden pointer-events-auto mb-4">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent opacity-50"></div>
+          
+          <button onclick="window.showInfoCard(null)" class="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 text-[9px] font-bold uppercase tracking-wider">Featured</span>
+            <span id="card-year" class="text-white/30 text-[9px] uppercase tracking-wider font-medium"></span>
+          </div>
+
+          <h3 id="card-title" class="text-xl md:text-2xl font-serif font-semibold mb-1 leading-tight italic"></h3>
+          <p id="card-artist" class="text-white/50 font-display text-[10px] mb-4 flex items-center gap-2">
+            <span class="w-3 h-[1px] bg-white/20"></span>
+          </p>
+          
+          <p id="card-description" class="text-xs text-white/70 leading-relaxed font-light mb-6 line-clamp-3 md:line-clamp-none"></p>
+
+          <button onclick="window.viewFullscreen()" class="w-full py-3 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/90 transition-colors flex items-center justify-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Fullscreen
+          </button>
+        </div>
+
+        <!-- Launch Button (Moved to bottom-right) -->
+        <div class="pointer-events-auto flex flex-col items-end">
+          <button id="ar-launch-btn" onclick="window.enterAR()" class="group relative px-8 py-4 md:px-12 md:py-6 bg-white text-black rounded-full font-display font-bold shadow-[0_0_50px_rgba(255,255,255,0.2)] flex items-center gap-3 md:gap-4 transition-all hover:scale-105 active:scale-95">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <span class="tracking-widest uppercase text-[10px] md:text-xs">Launch AR</span>
+            <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-black/5 flex items-center justify-center group-hover:bg-black/10 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fullscreen Image Modal (Moved inside UI container for AR support) -->
+    <div id="fullscreen-modal" class="hidden fixed inset-0 z-[200] bg-black/95 opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto">
+      <button onclick="window.closeFullscreen()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[210]">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <img id="fullscreen-img" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" referrerPolicy="no-referrer">
+    </div>
+  </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xl transition-opacity duration-700 flex items-center justify-center p-8 text-center">
+      <div class="absolute inset-0 opacity-20 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-500/30 rounded-full blur-[120px] animate-pulse-soft"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] animate-pulse-soft" style="animation-delay: -4s"></div>
+      </div>
+
+      <div class="max-w-md relative">
+        <div class="w-20 h-20 mx-auto mb-8 rounded-3xl bg-white/5 flex items-center justify-center border border-white/10">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>
+        </div>
+        
+        <h2 class="text-white text-5xl font-serif italic font-semibold mb-4 tracking-tight">STF Photo</h2>
+        <p class="text-white/40 font-display text-[10px] uppercase tracking-[0.4em] mb-10">AR Experience</p>
+        
+        <div class="glass-light p-8 rounded-[2rem] mb-10 text-left relative overflow-hidden">
+          <h4 class="text-white/80 text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            Description:
+          </h4>
+          <p id="curator-note-display" class="text-white/50 text-xs leading-relaxed italic font-serif">
+            <!-- Injected via script -->
+          </p>
+        </div>
+
+        <div class="space-y-4 mb-12">
+          <div class="flex items-center gap-4 text-left glass-light px-6 py-4 rounded-2xl border-white/5">
+            <div class="w-6 h-6 rounded-full bg-white/5 flex-shrink-0 flex items-center justify-center text-[10px] font-bold border border-white/10">1</div>
+            <p class="text-white/60 text-[11px] font-medium tracking-wide">Explore the space using your device.</p>
+          </div>
+          <div class="flex items-center gap-4 text-left glass-light px-6 py-4 rounded-2xl border-white/5">
+            <div class="w-6 h-6 rounded-full bg-white/5 flex-shrink-0 flex items-center justify-center text-[10px] font-bold border border-white/10">2</div>
+            <p class="text-white/60 text-[11px] font-medium tracking-wide">Focus on any artwork to reveal its story.</p>
+          </div>
+        </div>
+
+        <button onclick="window.closeInstructions()" class="w-full py-6 bg-white text-black rounded-[2rem] font-display font-bold uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95 shadow-2xl">
+          Enter Exhibit
+        </button>
+      </div>
+    </div>
+
+    <!-- AR Mode UI -->
+    <div id="ar-mode-ui" class="hidden fixed top-6 left-1/2 -translate-x-1/2 z-[60] pointer-events-none">
+      <div class="glass px-6 py-3 rounded-full flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+        <span class="text-white text-[10px] font-bold uppercase tracking-widest">AR Live Mode</span>
+      </div>
+    </div>
+
+    <script>
+      const assets = document.getElementById('gallery-assets');
+      const container = document.getElementById('gallery-container');
+
+      // Set Curator's Note
+      const noteDisplay = document.getElementById('curator-note-display');
+      if (noteDisplay) noteDisplay.innerText = `"${CURATOR_NOTE}"`;
+
+      // Initialize Items
+      GALLERY_DATA.forEach((item, index) => {
+        // 1. Create the Image Asset
+        const img = document.createElement('img');
+        img.id = `img-${item.id}`;
+        img.src = item.file;
+        img.crossOrigin = "anonymous";
+        img.referrerPolicy = "no-referrer";
+        assets.appendChild(img);
+
+        // 2. Position logic (2-row Arc: 4 top, 4 bottom)
+        const itemsPerRow = 4;
+        const rowIndex = Math.floor(index / itemsPerRow); // 0 for top, 1 for bottom
+        const colIndex = index % itemsPerRow;
+        
+        const totalAngle = 60; // Tighter arc for closer grouping
+        const angleStep = totalAngle / (itemsPerRow - 1);
+        const angle = -(totalAngle / 2) + (colIndex * angleStep);
+        const radius = 4.5; // Brought closer to the viewer
+        
+        const x = Math.sin(angle * (Math.PI / 180)) * radius;
+        const z = -Math.cos(angle * (Math.PI / 180)) * radius;
+        
+        // Vertical spacing: Relative to head height (1.6m)
+        // Top row world 3.0m -> local 1.4m
+        // Bottom row world 1.2m -> local -0.4m
+        const y = rowIndex === 0 ? 1.4 : -0.4;
+        
+        const entity = document.createElement('a-entity');
+        entity.setAttribute('position', `${x} ${y} ${z}`);
+        entity.setAttribute('rotation', `0 ${-angle} 0`);
+
+        // 3. Create the Frame & Canvas with initial placeholder size
+        const baseH = 1.6; // Slightly smaller height to fit two rows
+        const baseW = 1.2;
+
+        entity.innerHTML = `
+          <a-box id="frame-bg-${item.id}" position="0 0 -0.06" width="${baseW + 0.15}" height="${baseH + 0.15}" depth="0.06" color="#1a1a1a"></a-box>
+          <a-box id="frame-border-${item.id}" position="0 0 -0.03" width="${baseW + 0.06}" height="${baseH + 0.06}" depth="0.04" color="#D4AF37"></a-box>
+          <a-image id="canvas-${item.id}" src="#img-${item.id}" width="${baseW}" height="${baseH}" class="clickable" gallery-item="id: ${item.id}"></a-image>
+        `;
+
+        container.appendChild(entity);
+
+        // 4. Dynamic Sizing Logic: Detect real image dimensions
+        const checkImg = new Image();
+        checkImg.src = item.file;
+        checkImg.crossOrigin = "anonymous";
+        
+        checkImg.onload = function() {
+          const ratio = checkImg.naturalWidth / checkImg.naturalHeight;
+          let finalW, finalH;
+          
+          // Fit within baseW x baseH while maintaining aspect ratio (Contain)
+          if (ratio > (baseW / baseH)) {
+            finalW = baseW;
+            finalH = baseW / ratio;
+          } else {
+            finalH = baseH;
+            finalW = baseH * ratio;
+          }
+          
+          // Update A-Frame elements
+          const canvas = document.getElementById(`canvas-${item.id}`);
+          const bg = document.getElementById(`frame-bg-${item.id}`);
+          const border = document.getElementById(`frame-border-${item.id}`);
+          
+          if (canvas) {
+            canvas.setAttribute('width', finalW);
+            canvas.setAttribute('height', finalH);
+          }
+          if (bg) {
+            bg.setAttribute('width', finalW + 0.15);
+            bg.setAttribute('height', finalH + 0.15);
+          }
+          if (border) {
+            border.setAttribute('width', finalW + 0.06);
+            border.setAttribute('height', finalH + 0.06);
+          }
+          
+          console.log(`Adjusted ${item.title}: Ratio ${ratio.toFixed(2)} -> Size ${finalW.toFixed(2)}x${finalH.toFixed(2)}`);
+        };
+      });
+
+      // AR Visibility
+      const scene = document.querySelector('a-scene');
+      scene.addEventListener('enter-vr', () => {
+        if (scene.is('ar-mode')) {
+          // Hide environment to show camera feed
+          document.getElementById('floor').setAttribute('visible', 'false');
+          document.getElementById('sky').setAttribute('visible', 'false');
+          
+          document.getElementById('ar-launch-btn').classList.add('hidden');
+          document.getElementById('ar-mode-ui').classList.remove('hidden');
+        }
+      });
+      scene.addEventListener('exit-vr', () => {
+        document.getElementById('floor').setAttribute('visible', 'true');
+        document.getElementById('sky').setAttribute('visible', 'true');
+        
+        document.getElementById('ar-launch-btn').classList.remove('hidden');
+        document.getElementById('ar-mode-ui').classList.add('hidden');
+      });
+    </script>
+  </body>
+</html>
+
