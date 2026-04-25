@@ -249,7 +249,7 @@
     </a-scene>
 
     <!-- UI Overlay Container -->
-    <div id="ui-container" class="w-full h-full" style="pointer-events: none;">
+    <div id="ui-container" class="fixed inset-0 w-full h-full" style="pointer-events: none;">
       <div class="fixed inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-10 z-50">
       
       <!-- Top Nav -->
@@ -298,7 +298,7 @@
       </div>
 
       <!-- Fullscreen Image Modal (Inside UI container for AR support) -->
-      <div id="fullscreen-modal" class="hidden fixed inset-0 z-[200] bg-black opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto" style="display: none;">
+      <div id="fullscreen-modal" class="hidden fixed inset-0 z-[300] bg-black opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto" style="display: none;">
         <button onclick="window.closeFullscreen()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[210]">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
