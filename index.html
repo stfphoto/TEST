@@ -101,6 +101,14 @@
           file: "assets/pic2.jpg", 
           description: "Additional gallery piece.",
           year: "2024"
+        },
+        { 
+          id: 9, 
+          title: "Gallery Piece 9", 
+          artist: "STF Photography", 
+          file: "assets/pic3.jpg", 
+          description: "Additional gallery piece.",
+          year: "2024"
         }
       ];
 
@@ -310,7 +318,6 @@
       </button>
       <img id="fullscreen-img" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" referrerPolicy="no-referrer">
     </div>
-  </div>
 
     <!-- Instructions Modal -->
     <div id="instructions-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xl transition-opacity duration-700 flex items-center justify-center p-8 text-center">
@@ -380,23 +387,34 @@
         img.referrerPolicy = "no-referrer";
         assets.appendChild(img);
 
-        // 2. Position logic (2-row Arc: 4 top, 4 bottom)
-        const itemsPerRow = 4;
-        const rowIndex = Math.floor(index / itemsPerRow); // 0 for top, 1 for bottom
-        const colIndex = index % itemsPerRow;
+        // 2. Hierarchical Position logic (3 groups: 1 top piece above 2 bottom pieces)
+        let angle, y;
+        const radius = 4.5; // Distance from center
+        const groupSpacing = 50; // Degrees between groups (Increased for spacing)
+        const childOffset = 11; // Degrees offset from parent center for children (Increased for spacing)
         
-        const totalAngle = 60; // Tighter arc for closer grouping
-        const angleStep = totalAngle / (itemsPerRow - 1);
-        const angle = -(totalAngle / 2) + (colIndex * angleStep);
-        const radius = 4.5; // Brought closer to the viewer
+        if (index < 3) {
+          // Top Row (Parents)
+          const groupIndex = index;
+          angle = (groupIndex - 1) * groupSpacing;
+          y = 1.4;
+        } else {
+          // Bottom Row (Children)
+          const childIndex = index - 3;
+          const groupIndex = Math.floor(childIndex / 2);
+          const subIndex = childIndex % 2; // 0 for left child, 1 for right child
+          
+          const groupCenterAngle = (groupIndex - 1) * groupSpacing;
+          angle = groupCenterAngle + (subIndex === 0 ? -childOffset : childOffset);
+          y = -0.4;
+        }
         
         const x = Math.sin(angle * (Math.PI / 180)) * radius;
         const z = -Math.cos(angle * (Math.PI / 180)) * radius;
         
         // Vertical spacing: Relative to head height (1.6m)
-        // Top row world 3.0m -> local 1.4m
-        // Bottom row world 1.2m -> local -0.4m
-        const y = rowIndex === 0 ? 1.4 : -0.4;
+        // Parent: world 3.0m (1.6 + 1.4)
+        // Children: world 1.2m (1.6 - 0.4)
         
         const entity = document.createElement('a-entity');
         entity.setAttribute('position', `${x} ${y} ${z}`);
@@ -476,4 +494,3 @@
     </script>
   </body>
 </html>
-
