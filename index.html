@@ -397,7 +397,7 @@
           // Top Row (Parents)
           const groupIndex = index;
           angle = (groupIndex - 1) * groupSpacing;
-          y = 0.8; // Brought down from 1.4
+          y = 0.5; // Brought down from 0.8
         } else {
           // Bottom Row (Children)
           const childIndex = index - 3;
@@ -406,15 +406,15 @@
           
           const groupCenterAngle = (groupIndex - 1) * groupSpacing;
           angle = groupCenterAngle + (subIndex === 0 ? -childOffset : childOffset);
-          y = -0.6; // Stayed roughly the same or slightly lower to balance
+          y = -0.5; // Brought up from -0.6
         }
         
         const x = Math.sin(angle * (Math.PI / 180)) * radius;
         const z = -Math.cos(angle * (Math.PI / 180)) * radius;
         
         // Vertical spacing: Relative to head height (1.6m)
-        // Parent: world 2.4m (1.6 + 0.8)
-        // Children: world 1.0m (1.6 - 0.6)
+        // Parent: world 2.1m (1.6 + 0.5)
+        // Children: world 1.1m (1.6 - 0.5)
         
         const entity = document.createElement('a-entity');
         entity.setAttribute('position', `${x} ${y} ${z}`);
