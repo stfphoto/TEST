@@ -191,7 +191,8 @@
         img.src = window.currentItem.file;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        // Use a faster transition for AR mode stability
+        modal.classList.remove('opacity-0');
       };
 
       window.closeFullscreen = function() {
@@ -270,17 +271,17 @@
       <div class="flex flex-row justify-between items-end w-full pointer-events-none">
         
         <!-- Info Card (Enhanced & Adaptable) -->
-        <div id="info-card" class="opacity-0 translate-y-10 pointer-events-none transition-all duration-500 glass p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-2xl w-[calc(100%-1rem)] max-w-[320px] md:max-w-sm text-white relative border border-white/10 overflow-hidden pointer-events-auto mb-4 mx-2 md:mx-0">
-          <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500/40"></div>
+        <div id="info-card" class="opacity-0 translate-y-10 pointer-events-none transition-all duration-500 glass p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-2xl w-[calc(100%-2rem)] max-w-sm text-white relative border border-white/10 overflow-hidden pointer-events-auto mb-4 mx-4 md:mx-0">
+          <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-500/60"></div>
           <button onclick="window.showInfoCard(null)" class="absolute top-3 right-3 p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
-          <div class="mb-1">
-             <span class="text-[10px] uppercase tracking-[0.2em] text-yellow-500/80 font-bold">Information</span>
+          <div class="mb-2">
+             <span class="text-[10px] uppercase tracking-[0.3em] text-yellow-500 font-bold opacity-80">Details</span>
           </div>
-          <p id="card-description" class="text-xs md:text-sm text-white/90 leading-relaxed font-light mb-5 pr-4"></p>
-          <button onclick="window.viewFullscreen()" class="w-full py-3 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-yellow-500 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          <p id="card-description" class="text-xs md:text-sm text-white/90 leading-relaxed font-light mb-6 pr-6"></p>
+          <button onclick="window.viewFullscreen()" class="w-full py-3.5 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all flex items-center justify-center gap-3 shadow-lg active:scale-95">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
              View Fullscreen
           </button>
         </div>
