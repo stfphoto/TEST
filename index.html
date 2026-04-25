@@ -90,7 +90,7 @@
           id: 7, 
           title: "Gallery Piece 7", 
           artist: "STF Photography", 
-          file: "assets/pic7.jpg", 
+          file: "assets/pic1.jpg", 
           description: "Additional gallery piece.",
           year: "2024"
         },
@@ -98,7 +98,7 @@
           id: 8, 
           title: "Gallery Piece 8", 
           artist: "STF Photography", 
-          file: "assets/pic8.jpg", 
+          file: "assets/pic2.jpg", 
           description: "Additional gallery piece.",
           year: "2024"
         },
@@ -106,7 +106,7 @@
           id: 9, 
           title: "Gallery Piece 9", 
           artist: "STF Photography", 
-          file: "assets/pic9.jpg", 
+          file: "assets/pic3.jpg", 
           description: "Additional gallery piece.",
           year: "2024"
         }
@@ -180,10 +180,7 @@
           return;
         }
         window.currentItem = item;
-        document.getElementById('card-title').innerText = item.title;
-        document.getElementById('card-artist').innerText = `by ${item.artist}`;
         document.getElementById('card-description').innerText = item.description;
-        document.getElementById('card-year').innerText = item.year;
         card.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
       };
 
@@ -272,51 +269,38 @@
       <!-- Bottom Controls -->
       <div class="flex flex-row justify-between items-end w-full pointer-events-none">
         
-        <!-- Info Card (Moved to bottom-left) -->
-        <div id="info-card" class="opacity-0 translate-y-10 pointer-events-none transition-all duration-500 glass p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl max-w-[320px] md:max-w-md w-full text-white relative overflow-hidden pointer-events-auto mb-4">
-          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent opacity-50"></div>
-          
-          <button onclick="window.showInfoCard(null)" class="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        <!-- Info Card (Enhanced & Adaptable) -->
+        <div id="info-card" class="opacity-0 translate-y-10 pointer-events-none transition-all duration-500 glass p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-2xl w-[calc(100%-1rem)] max-w-[320px] md:max-w-sm text-white relative border border-white/10 overflow-hidden pointer-events-auto mb-4 mx-2 md:mx-0">
+          <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500/40"></div>
+          <button onclick="window.showInfoCard(null)" class="absolute top-3 right-3 p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
-
-          <div class="flex items-center gap-2 mb-3">
-            <span class="px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500 text-[9px] font-bold uppercase tracking-wider">Featured</span>
-            <span id="card-year" class="text-white/30 text-[9px] uppercase tracking-wider font-medium"></span>
+          <div class="mb-1">
+             <span class="text-[10px] uppercase tracking-[0.2em] text-yellow-500/80 font-bold">Information</span>
           </div>
-
-          <h3 id="card-title" class="text-xl md:text-2xl font-serif font-semibold mb-1 leading-tight italic"></h3>
-          <p id="card-artist" class="text-white/50 font-display text-[10px] mb-4 flex items-center gap-2">
-            <span class="w-3 h-[1px] bg-white/20"></span>
-          </p>
-          
-          <p id="card-description" class="text-xs text-white/70 leading-relaxed font-light mb-6 line-clamp-3 md:line-clamp-none"></p>
-
-          <button onclick="window.viewFullscreen()" class="w-full py-3 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/90 transition-colors flex items-center justify-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            View Fullscreen
+          <p id="card-description" class="text-xs md:text-sm text-white/90 leading-relaxed font-light mb-5 pr-4"></p>
+          <button onclick="window.viewFullscreen()" class="w-full py-3 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-yellow-500 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+             View Fullscreen
           </button>
         </div>
 
-        <!-- Launch Button (Moved to bottom-right) -->
+        <!-- Launch Button -->
         <div class="pointer-events-auto flex flex-col items-end">
           <button id="ar-launch-btn" onclick="window.enterAR()" class="group relative px-8 py-4 md:px-12 md:py-6 bg-white text-black rounded-full font-display font-bold shadow-[0_0_50px_rgba(255,255,255,0.2)] flex items-center gap-3 md:gap-4 transition-all hover:scale-105 active:scale-95">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
             <span class="tracking-widest uppercase text-[10px] md:text-xs">Launch AR</span>
-            <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-black/5 flex items-center justify-center group-hover:bg-black/10 transition-colors">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-            </div>
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- Fullscreen Image Modal (Moved inside UI container for AR support) -->
-    <div id="fullscreen-modal" class="hidden fixed inset-0 z-[200] bg-black/95 opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto">
-      <button onclick="window.closeFullscreen()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[210]">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-      <img id="fullscreen-img" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" referrerPolicy="no-referrer">
+      <!-- Fullscreen Image Modal (Inside UI container for AR support) -->
+      <div id="fullscreen-modal" class="hidden fixed inset-0 z-[200] bg-black/95 opacity-0 transition-opacity duration-500 flex-col items-center justify-center p-4 md:p-10 pointer-events-auto">
+        <button onclick="window.closeFullscreen()" class="absolute top-6 right-6 p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all z-[210]">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <img id="fullscreen-img" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" referrerPolicy="no-referrer">
+      </div>
     </div>
 
     <!-- Instructions Modal -->
